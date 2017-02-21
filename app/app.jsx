@@ -1,8 +1,8 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
-//This will give you new URL that people will be able to visit.
 var {Route, Router, IndexRoute, hashHistory} = require('react-router');
 
+var TodoApp = require('TodoApp');
 
 //Load foundation
 $(document).foundation();
@@ -11,6 +11,6 @@ $(document).foundation();
 require('style!css!sass!applicationStyles');
 
 ReactDOM.render(
-    <p>React Base</p>,
+    <TodoApp />,
     document.getElementById('app')
 );
