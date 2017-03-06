@@ -41,7 +41,6 @@ describe('TodoList', () => {
     // Is gonna let us check how many of a given component are render on a separed component
     // in this case we wanna check how many todo components are rendered under todolist component
     var todosComponents = TestUtils.scryRenderedComponentsWithType(todoList, ConnedtedTodo);
-
     expect(todosComponents.length).toBe(todos.length);
   });
 
