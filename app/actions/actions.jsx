@@ -1,3 +1,5 @@
+import moment from 'moment';
+import firebase, {firebaseRef} from 'app/firebase/index';
 
 export var setSearchText = (searchText) => {
   return {
@@ -13,10 +15,32 @@ export var toggleShowCompleted = () => {
   };
 };
 
-export var addTodo = (text) => {
+export var addTodo = (todo) => {
   return {
     type: 'ADD_TODO',
-    text
+    todo
+  };
+};
+
+export var startAddTodo = (text) => {
+  // First we save the data to Firebase
+  return (dispatch, getState) => {
+    var todo = {
+      // id: uuid(), We don't need the ID anymore because is gonna be added by Firebase
+      text,
+      completed: false,
+      createdAt: moment().unix(),
+      completedAt: null
+    };
+    var todoRef = firebaseRef.child('todos').push(todo);
+
+    // Firebase promise, when the fb database gets updated we dispatch a regular action that updates our view
+    return todoRef.then(() => {
+      dispatch(addTodo({
+        ...todo,
+        id: todoRef.key
+      }));
+    });
   };
 };
 
