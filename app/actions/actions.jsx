@@ -51,10 +51,27 @@ export var addTodos = (todos) => {
   };
 };
 
-// toggleTodo(id)
-export var toggleTodo = (id) => {
+export var updateTodo = (id, updates) => {
   return {
-    type: 'TOGGLE_TODO',
-    id
+    type: 'UPDATE_TODO',
+    id,
+    updates
+  };
+};
+
+// We installed thunk so we can return functions
+// this let us do asyncronous actions and dispatch asyncronous ones
+export var startToggleTodo = (id, completed) => {
+  return (dispatch, getState) => {
+      var todoRef = firebaseRef.child(`todos/${id}`);
+      var updates = {
+        completed,
+        completedAt: completed ? moment().unix() : null
+      };
+
+      // Returning the promise let us chain on to then inside of our test
+      return todoRef.update(updates).then(() => {
+        dispatch(updateTodo(id, updates));
+      });
   };
 };
