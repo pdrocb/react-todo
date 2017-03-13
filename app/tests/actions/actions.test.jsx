@@ -13,17 +13,15 @@ describe('Actions', () => {
       type: 'SET_SEARCH_TEXT',
       searchText: 'Some search text'
     };
-
     var res = actions.setSearchText(action.searchText);
 
     expect(res).toEqual(action);
   });
 
-  it('Should toggle completed todos', () => {
+  it('should generate toggle show completed action', () => {
     var action = {
       type: 'TOGGLE_SHOW_COMPLETED'
     };
-
     var res = actions.toggleShowCompleted();
 
     expect(res).toEqual(action);
@@ -33,13 +31,12 @@ describe('Actions', () => {
     var action = {
       type: 'ADD_TODO',
       todo: {
-        id: 'abc123',
-        text: 'anything we like',
+        id: '123abc',
+        text: 'Anything we like',
         completed: false,
-        completedAt: 0
+        createdAt: 0
       }
     };
-
     var res = actions.addTodo(action.todo);
 
     expect(res).toEqual(action);
@@ -96,13 +93,19 @@ describe('Actions', () => {
 
     // Gets fire before every single test case
     beforeEach((done) => {
-      testTodoRef = firebaseRef.child('todos').push();
+      var todosRef = firebaseRef.child('todos');
 
-      testTodoRef.set({
-        text: 'Something to do',
-        completed: false,
-        completedAt: 123
-      }).then(() => done());
+      todosRef.remove().then(() => {
+        testTodoRef = firebaseRef.child('todos').push();
+
+        return testTodoRef.set({
+          text: 'Something to do',
+          completed: false,
+          createdAt: 123
+        });
+      })
+      .then(() => done())
+      .catch(done);
     });
 
     // Gets fire after every single test case
@@ -125,6 +128,23 @@ describe('Actions', () => {
           completed: true
         });
         expect(mockActions[0].updates.completedAt).toExist();
+
+        done();
+      }, done);
+    });
+
+    it('should populate todos and dispatch ADD_TODOS', (done) => {
+      const store = createMockStore({});
+      const action = actions.startAddTodos();
+
+      store.dispatch(action).then(() => {
+        // getActions returns an array of all the actions
+        // that have been dispatch since the store was created
+        const mockActions = store.getActions();
+
+        expect(mockActions[0].type).toEqual('ADD_TODOS');
+        expect(mockActions[0].todos.length).toEqual(1);
+        expect(mockActions[0].todos[0].text).toEqual('Something to do');
 
         done();
       }, done);
