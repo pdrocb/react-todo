@@ -1,7 +1,7 @@
-var $ = require('jQuery');
+var $ = require('jquery');
 
 module.exports = {
-  
+
   filteredTodos: function (todos, showCompleted, searchText) {
     var filteredTodos = todos;
 
