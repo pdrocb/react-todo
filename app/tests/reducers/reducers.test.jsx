@@ -89,4 +89,32 @@ describe('Reducers', () => {
       expect(res[0]).toEqual(todos[0]);
     });
   });
+
+  describe('authReducer', () => {
+    it('Should store uid on LOGIN', () => {
+      const action = {
+        type: 'LOGIN',
+        uid: 'abc123'
+      };
+      //DF works to know if the value is changed inside the funcion
+      // should not be changed because reducers are pure functions
+      const res = reducers.authReducer(undefined, df(action));
+
+      expect(res).toEqual({
+        uid: action.uid
+      });
+    });
+
+    it('Should wipe auth on LOGOUT', () => {
+      const authData = {
+        uid: 'abc123'
+      };
+      const action = {
+        type: 'LOGOUT'
+      };
+      const res = reducers.authReducer(df(authData), df(action));
+
+      expect(res).toEqual({});
+    });
+  });
 });
