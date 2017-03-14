@@ -1,5 +1,5 @@
 import moment from 'moment';
-import firebase, {firebaseRef} from 'app/firebase/index';
+import firebase, {firebaseRef, gitHubProvider} from 'app/firebase/index';
 
 export var setSearchText = (searchText) => {
   return {
@@ -79,7 +79,7 @@ export var updateTodo = (id, updates) => {
   };
 };
 
-// We installed thunk so we can return functions
+// We installed thunk so we can return functions and no objects like others actions
 // this let us do asyncronous actions and dispatch asyncronous ones
 export var startToggleTodo = (id, completed) => {
   return (dispatch, getState) => {
@@ -93,5 +93,23 @@ export var startToggleTodo = (id, completed) => {
       return todoRef.update(updates).then(() => {
         dispatch(updateTodo(id, updates));
       });
+  };
+};
+
+export var startLogin = () => {
+  return (dispatch, getState) => {
+    return firebase.auth().signInWithPopup(gitHubProvider).then((result) => {
+      console.log("Auth worked!", result);
+    }, (error) => {
+      console.log("Unable to Auth", error);
+    });
+  };
+};
+
+export var startLogout = () => {
+  return (dispatch, getState) => {
+    firebase.auth().signOut().then(() => {
+      console.log("Logged out!");
+    });
   };
 };
