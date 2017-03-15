@@ -32,7 +32,8 @@ export var startAddTodo = (text) => {
       createdAt: moment().unix(),
       completedAt: null
     };
-    var todoRef = firebaseRef.child('todos').push(todo);
+    var uid = getState().auth.uid; // from the auth state with define un authReducer
+    var todoRef = firebaseRef.child(`users/${uid}/todos`).push(todo);
 
     // Firebase promise, when the fb database gets updated we dispatch a regular action that updates our view
     return todoRef.then(() => {
@@ -53,7 +54,8 @@ export var addTodos = (todos) => {
 
 export var startAddTodos = () => {
   return (dispatch, getState) => {
-    var todosRef = firebaseRef.child('todos');
+    var uid = getState().auth.uid;
+    var todosRef = firebaseRef.child(`users/${uid}/todos`);
 
     return todosRef.once('value').then((snapshot) => {
       var todos = snapshot.val() || {};
@@ -83,16 +85,17 @@ export var updateTodo = (id, updates) => {
 // this let us do asyncronous actions and dispatch asyncronous ones
 export var startToggleTodo = (id, completed) => {
   return (dispatch, getState) => {
-      var todoRef = firebaseRef.child(`todos/${id}`);
-      var updates = {
-        completed,
-        completedAt: completed ? moment().unix() : null
-      };
+    var uid = getState().auth.uid;
+    var todoRef = firebaseRef.child(`users/${uid}/todos/${id}`);
+    var updates = {
+      completed,
+      completedAt: completed ? moment().unix() : null
+    };
 
-      // Returning the promise let us chain on to then inside of our test
-      return todoRef.update(updates).then(() => {
-        dispatch(updateTodo(id, updates));
-      });
+    // Returning the promise let us chain on to then inside of our test
+    return todoRef.update(updates).then(() => {
+      dispatch(updateTodo(id, updates));
+    });
   };
 };
 
