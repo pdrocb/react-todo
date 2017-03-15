@@ -42,23 +42,6 @@ describe('Actions', () => {
     expect(res).toEqual(action);
   });
 
-  // Done makes possible to keep listening for assertions or error until done gets call
-  it('should create todo and dispatch ADD_TODO', (done) => {
-    const store = createMockStore({});
-    const todoText = 'My todo Text';
-
-    store.dispatch(actions.startAddTodo(todoText)).then(() => {
-      const actions = store.getActions();
-      expect(actions[0]).toInclude({
-        type: 'ADD_TODO'
-      });
-      expect(actions[0].todo).toInclude({
-        text: todoText
-      });
-      done();
-    }).catch(done);
-  });
-
   it('should generate ADD_TODOS action object', () => {
     var todos = [{
       id: '111',
@@ -111,18 +94,23 @@ describe('Actions', () => {
 
   describe('Test with firebase todo', () => {
     var testTodoRef;
+    var uid;
+    var todosRef;
 
     // Gets fire before every single test case
     beforeEach((done) => {
-      var todosRef = firebaseRef.child('todos');
+      firebase.auth().signInAnonymously().then((user) => {
+        uid = user.uid;
+        todosRef = firebaseRef.child(`users/${uid}/todos`);
 
-      todosRef.remove().then(() => {
-        testTodoRef = firebaseRef.child('todos').push();
+        return todosRef.remove();
+      }).then(() => {
+        testTodoRef = todosRef.push();
 
         return testTodoRef.set({
           text: 'Something to do',
           completed: false,
-          createdAt: 123
+          createdAt: 23453453
         });
       })
       .then(() => done())
@@ -131,11 +119,11 @@ describe('Actions', () => {
 
     // Gets fire after every single test case
     afterEach((done) => {
-      testTodoRef.remove().then(() => done());
+      todosRef.remove().then(() => done());
     });
 
     it('Should toggle todo and dispatch UPDATE_TODO action', (done) => {
-      const store = createMockStore();
+      const store = createMockStore({auth: {uid}});
       const action = actions.startToggleTodo(testTodoRef.key, true);
 
       store.dispatch(action).then(() => {
@@ -155,7 +143,7 @@ describe('Actions', () => {
     });
 
     it('should populate todos and dispatch ADD_TODOS', (done) => {
-      const store = createMockStore({});
+      const store = createMockStore({auth: {uid}});
       const action = actions.startAddTodos();
 
       store.dispatch(action).then(() => {
@@ -169,6 +157,23 @@ describe('Actions', () => {
 
         done();
       }, done);
+    });
+
+    // Done makes possible to keep listening for assertions or error until done gets call
+    it('should create todo and dispatch ADD_TODO', (done) => {
+      const store = createMockStore({auth: {uid}});
+      const todoText = 'My todo Text';
+
+      store.dispatch(actions.startAddTodo(todoText)).then(() => {
+        const actions = store.getActions();
+        expect(actions[0]).toInclude({
+          type: 'ADD_TODO'
+        });
+        expect(actions[0].todo).toInclude({
+          text: todoText
+        });
+        done();
+      }).catch(done);
     });
   });
 });
