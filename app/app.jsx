@@ -15,7 +15,7 @@ firebase.auth().onAuthStateChanged((user) => {
 
     //once we have uid we can now retrieve logged user todos
     store.dispatch(actions.startAddTodos());
-    
+
     hashHistory.push('/todos');
   } else {
     store.dispatch(actions.logout());
